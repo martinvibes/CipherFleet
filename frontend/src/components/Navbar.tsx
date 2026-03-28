@@ -7,9 +7,10 @@ interface NavbarProps {
   hitCount: number;
   isMyTurn: boolean;
   phase: string;
+  onLogoClick: () => void;
 }
 
-export default function Navbar({ myShips, enemyShips, attackCount, hitCount, isMyTurn, phase }: NavbarProps) {
+export default function Navbar({ myShips, enemyShips, attackCount, hitCount, isMyTurn, phase, onLogoClick }: NavbarProps) {
   return (
     <nav className="h-16 flex items-center px-10 sticky top-0 z-50"
       style={{
@@ -23,8 +24,8 @@ export default function Navbar({ myShips, enemyShips, attackCount, hitCount, isM
         style={{ background: 'linear-gradient(90deg, transparent 0%, var(--crimson) 30%, var(--crimson) 70%, transparent 100%)' }}
       />
 
-      {/* Logo */}
-      <div className="flex items-center gap-4 flex-1">
+      {/* Logo — click to go back to landing */}
+      <div className="flex items-center gap-4 flex-1 cursor-pointer" onClick={onLogoClick}>
         <LogoHex />
         <div>
           <div className="text-xl tracking-[0.2em] font-bold uppercase" style={{ fontFamily: "'Cinzel', serif", color: 'var(--t1)' }}>
