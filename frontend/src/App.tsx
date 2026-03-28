@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import SidebarLeft from './components/SidebarLeft';
 import GameGrid from './components/GameGrid';
@@ -27,7 +27,21 @@ export default function App() {
     placeShip,
     doAttack,
     resetGame,
+    quickDeploy,
   } = useGameState();
+
+  // Track the coord being attacked (shown during computing phase)
+  const [attackCoord, setAttackCoord] = useState<{ coord: string; row: number; col: number } | null>(null);
+
+  // Update attackCoord when a new attack starts
+  useEffect(() => {
+    if (attackingCell) {
+      const [r, c] = attackingCell.split(',').map(Number);
+      setAttackCoord({ coord: `${COLS[c]}${r + 1}`, row: r, col: c });
+    } else if (!showOverlay) {
+      setAttackCoord(null);
+    }
+  }, [attackingCell, showOverlay]);
 
   // Heartbeat logs
   useEffect(() => {
@@ -64,7 +78,7 @@ export default function App() {
 
   return (
     <>
-      <AttackOverlay show={showOverlay} result={overlayResult} />
+      <AttackOverlay show={showOverlay} attackCoord={attackCoord} result={overlayResult} />
       <WinScreen show={showWin} onPlayAgain={resetGame} onClose={() => setShowWin(false)} />
 
       <Navbar
@@ -86,6 +100,7 @@ export default function App() {
           onOrientationToggle={() => setPlacingOrientation(o => o === 'H' ? 'V' : 'H')}
           onReset={resetGame}
           onDemoWin={() => setShowWin(true)}
+          onQuickDeploy={quickDeploy}
         />
 
         {/* Arena center */}

@@ -8,9 +8,10 @@ interface SidebarLeftProps {
   onOrientationToggle: () => void;
   onReset: () => void;
   onDemoWin: () => void;
+  onQuickDeploy: () => void;
 }
 
-export default function SidebarLeft({ phase, ships, placingShipIndex, placingOrientation, onOrientationToggle, onReset, onDemoWin }: SidebarLeftProps) {
+export default function SidebarLeft({ phase, ships, placingShipIndex, placingOrientation, onOrientationToggle, onReset, onDemoWin, onQuickDeploy }: SidebarLeftProps) {
   const phases = [
     { label: 'Place Ships', done: phase !== 'PLACING' && phase !== 'WAITING', active: phase === 'PLACING' },
     { label: 'Battle Phase', done: phase === 'FINISHED', active: phase === 'BATTLE' },
@@ -60,6 +61,13 @@ export default function SidebarLeft({ phase, ships, placingShipIndex, placingOri
           <div className="text-[9px] mb-2" style={{ color: 'var(--t3)' }}>
             Size: {ships[placingShipIndex]?.size} cells &middot; Click grid to place
           </div>
+          <button
+            onClick={onQuickDeploy}
+            className="w-full py-2 mb-2 text-[9px] tracking-[0.1em] uppercase border cursor-pointer transition-all hover:bg-[rgba(139,26,26,0.16)]"
+            style={{ fontFamily: "'JetBrains Mono', monospace", borderColor: 'rgba(139,26,26,0.5)', color: 'var(--flame)', background: 'rgba(139,26,26,0.08)' }}
+          >
+            Quick Deploy Fleet
+          </button>
           <button
             onClick={onOrientationToggle}
             className="w-full py-2 text-[9px] tracking-[0.1em] uppercase border cursor-pointer transition-all hover:border-[var(--crimson)] hover:text-[var(--flame)]"

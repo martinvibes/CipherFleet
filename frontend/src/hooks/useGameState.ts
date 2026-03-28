@@ -117,7 +117,12 @@ export function useGameState() {
     addLog('sys', 'NET', `Threshold ${3 + Math.floor(Math.random() * 2)}/5 nodes`);
 
     const isHit = Math.random() > 0.58;
-    setOverlayResult({ coord, row, col, hit: isHit });
+
+    // Phase 1: show overlay with computing state (no result yet)
+    // Phase 2: after delay, reveal result
+    setTimeout(() => {
+      setOverlayResult({ coord, row, col, hit: isHit });
+    }, 1900);
 
     setTimeout(() => {
       setGameState(prev => {
@@ -172,6 +177,31 @@ export function useGameState() {
     }, 2500);
   }, [gameState, addLog]);
 
+  // Auto-place ships and jump to battle (for demo)
+  const quickDeploy = useCallback(() => {
+    const presetShips: Ship[] = [
+      { name: 'Carrier', size: 4, cells: [[2, 3], [2, 4], [2, 5], [2, 6]], hits: 0, sunk: false },
+      { name: 'Destroyer', size: 3, cells: [[5, 1], [5, 2], [5, 3]], hits: 0, sunk: false },
+      { name: 'Submarine', size: 2, cells: [[0, 7], [1, 7]], hits: 0, sunk: false },
+      { name: 'Patrol Boat', size: 2, cells: [[7, 5], [7, 6]], hits: 0, sunk: false },
+    ];
+    const shipCells = new Set<string>();
+    presetShips.forEach(s => s.cells.forEach(([r, c]) => shipCells.add(`${r},${c}`)));
+
+    setGameState(prev => ({
+      ...prev,
+      phase: 'BATTLE' as Phase,
+      myShips: shipCells,
+      ships: presetShips,
+    }));
+    setPlacingShipIndex(INITIAL_SHIPS.length);
+
+    addLog('enc', 'ENC', 'FHE.asEuint8(1) \u00D7 11 cells');
+    addLog('enc', 'ENC', 'FHE.allowThis() \u00D7 11 handles');
+    addLog('sys', 'SYS', 'Fleet committed on-chain');
+    addLog('sys', 'SYS', 'Quick deploy \u2014 all ships encrypted');
+  }, [addLog]);
+
   const resetGame = useCallback(() => {
     startTime.current = Date.now();
     setGameState({
@@ -212,5 +242,6 @@ export function useGameState() {
     placeShip,
     doAttack,
     resetGame,
+    quickDeploy,
   };
 }

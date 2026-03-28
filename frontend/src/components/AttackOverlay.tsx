@@ -1,12 +1,12 @@
 interface AttackOverlayProps {
   show: boolean;
+  attackCoord: { coord: string; row: number; col: number } | null;
   result: { coord: string; row: number; col: number; hit: boolean } | null;
 }
 
-export default function AttackOverlay({ show, result }: AttackOverlayProps) {
+export default function AttackOverlay({ show, attackCoord, result }: AttackOverlayProps) {
   const resolved = result != null;
-  // Show computing state for first ~2.5s, then show result
-  // The parent handles timing, we just show what we're told
+  const display = result || attackCoord;
 
   return (
     <div
@@ -31,11 +31,11 @@ export default function AttackOverlay({ show, result }: AttackOverlayProps) {
         </div>
 
         <div className="text-[88px] font-bold leading-none tracking-[0.12em] mb-2" style={{ fontFamily: "'Cinzel', serif", color: 'var(--t1)' }}>
-          {result?.coord || '??'}
+          {display?.coord || '??'}
         </div>
 
         <div className="text-[9.5px] tracking-[0.06em] mb-[30px] font-light" style={{ color: 'var(--t3)' }}>
-          {result ? `FHE.eq(grid[${result.row}][${result.col}], euint8(1)) \u2192 CoFHE threshold network` : 'Processing...'}
+          {display ? `FHE.eq(grid[${display.row}][${display.col}], euint8(1)) \u2192 CoFHE threshold network` : 'Processing...'}
         </div>
 
         {!resolved && (
@@ -50,7 +50,7 @@ export default function AttackOverlay({ show, result }: AttackOverlayProps) {
           </>
         )}
 
-        {resolved && (
+        {resolved && result && (
           <div className="mt-[26px]">
             <div
               className="text-[52px] font-bold tracking-[0.16em] leading-none mb-2"
