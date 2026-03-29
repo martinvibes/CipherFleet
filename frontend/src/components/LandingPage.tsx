@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface LandingPageProps {
   onStartGame: () => void;
+  onFirstInteraction: () => void;
 }
 
 const HEX = '0123456789abcdef';
@@ -14,7 +15,7 @@ interface Explosion { x: number; y: number; radius: number; maxRadius: number; a
 interface GridHit { col: number; row: number; alpha: number; isHit: boolean; time: number; }
 interface Ship { x: number; y: number; width: number; height: number; facing: 'right' | 'left'; bobOffset: number; bobSpeed: number; }
 
-export default function LandingPage({ onStartGame }: LandingPageProps) {
+export default function LandingPage({ onStartGame, onFirstInteraction }: LandingPageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [phase, setPhase] = useState(0);
   const [typedTitle, setTypedTitle] = useState('');
@@ -23,8 +24,22 @@ export default function LandingPage({ onStartGame }: LandingPageProps) {
   const [hexStream, setHexStream] = useState(randHex(32));
   const [cardsVisible, setCardsVisible] = useState([false, false, false]);
   const [transitioning, setTransitioning] = useState(false);
+  const hasInteracted = useRef(false);
+  const [audioStarted, setAudioStarted] = useState(false);
   const title = 'CIPHERFLEET';
   const tagline = 'THE OCEAN IS ENCRYPTED';
+
+  // Start bg music on first click anywhere on the landing page
+  useEffect(() => {
+    const trigger = () => {
+      if (hasInteracted.current) return;
+      hasInteracted.current = true;
+      setAudioStarted(true);
+      onFirstInteraction();
+    };
+    document.addEventListener('click', trigger, { once: true });
+    return () => document.removeEventListener('click', trigger);
+  }, [onFirstInteraction]);
 
   // ── Phase sequencing ──
   useEffect(() => {
@@ -616,6 +631,27 @@ export default function LandingPage({ onStartGame }: LandingPageProps) {
         </div>
       </div>
 
+      {/* Audio enable prompt — fixed at bottom */}
+      {!audioStarted && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 py-3 px-6 cursor-pointer"
+          style={{
+            border: '1px solid rgba(139,26,26,0.4)',
+            background: 'rgba(6,5,10,0.9)',
+            backdropFilter: 'blur(8px)',
+            animation: 'audio-prompt-pulse 2s ease-in-out infinite',
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--crimson)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="rgba(139,26,26,0.3)" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          </svg>
+          <span className="text-[9px] tracking-[0.15em] uppercase" style={{ color: 'var(--flame)' }}>
+            Click anywhere to enable audio
+          </span>
+        </div>
+      )}
+
       <style>{`
         @keyframes radar-pulse {
           0%, 100% { opacity: 0.3; transform: scale(1); }
@@ -628,6 +664,10 @@ export default function LandingPage({ onStartGame }: LandingPageProps) {
         @keyframes btn-scan {
           0% { transform: translateY(-100%); }
           100% { transform: translateY(100%); }
+        }
+        @keyframes audio-prompt-pulse {
+          0%, 100% { box-shadow: 0 0 0 rgba(139,26,26,0); opacity: 0.8; }
+          50% { box-shadow: 0 0 20px rgba(139,26,26,0.3); opacity: 1; }
         }
       `}</style>
     </div>

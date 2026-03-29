@@ -7,6 +7,7 @@ import FHEFeed from './components/FHEFeed';
 import AttackOverlay from './components/AttackOverlay';
 import WinScreen from './components/WinScreen';
 import { useGameState } from './hooks/useGameState';
+import { useSound } from './hooks/useSound';
 import { COLS } from './lib/gameTypes';
 
 export default function App() {
@@ -32,6 +33,8 @@ export default function App() {
     resetGame,
     quickDeploy,
   } = useGameState();
+
+  const sound = useSound();
 
   // Track the coord being attacked (shown during computing phase)
   const [attackCoord, setAttackCoord] = useState<{ coord: string; row: number; col: number } | null>(null);
@@ -79,8 +82,33 @@ export default function App() {
       : null
   );
 
+  // Sound on attack overlay result
+  useEffect(() => {
+    if (overlayResult) {
+      if (overlayResult.hit) {
+        sound.hit();
+      } else {
+        sound.miss();
+      }
+    }
+  }, [overlayResult, sound]);
+
+  // Sound on win
+  useEffect(() => {
+    if (showWin) sound.victory();
+  }, [showWin, sound]);
+
   if (showLanding) {
-    return <LandingPage onStartGame={() => setShowLanding(false)} />;
+    return <LandingPage
+      onStartGame={() => {
+        setShowLanding(false);
+        sound.startGame();
+        sound.startDrone(0.25); // ensure music is playing at game volume
+      }}
+      onFirstInteraction={() => {
+        sound.startDrone(0.15); // start quiet on landing
+      }}
+    />;
   }
 
   return (
@@ -95,7 +123,11 @@ export default function App() {
         hitCount={gameState.hitCount}
         isMyTurn={gameState.isMyTurn}
         phase={gameState.phase}
-        onLogoClick={() => { setShowLanding(true); setShowPlacingPrompt(true); }}
+        onLogoClick={() => { setShowLanding(true); setShowPlacingPrompt(true); sound.stopDrone(); }}
+        musicOn={sound.musicOn}
+        sfxOn={sound.sfxOn}
+        onToggleMusic={sound.toggleMusic}
+        onToggleSfx={sound.toggleSfx}
       />
 
       <div className="layout-grid flex-1 grid min-h-[calc(100vh-64px)]" style={{ gridTemplateColumns: '220px 1fr 260px' }}>
@@ -108,7 +140,7 @@ export default function App() {
           onOrientationToggle={() => setPlacingOrientation(o => o === 'H' ? 'V' : 'H')}
           onReset={resetGame}
           onDemoWin={() => setShowWin(true)}
-          onQuickDeploy={quickDeploy}
+          onQuickDeploy={() => { quickDeploy(); sound.encrypt(); }}
         />
 
         {/* Arena center */}
@@ -145,7 +177,7 @@ export default function App() {
                   </p>
 
                   <button
-                    onClick={quickDeploy}
+                    onClick={() => { quickDeploy(); sound.encrypt(); }}
                     className="relative py-3.5 px-10 mb-4 uppercase tracking-[0.18em] text-[10px] border cursor-pointer transition-all duration-300"
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
@@ -194,7 +226,7 @@ export default function App() {
                   enemyMisses={gameState.enemyMisses}
                   attackingCell={null}
                   phase={gameState.phase}
-                  onCellClick={gameState.phase === 'PLACING' ? (r, c) => placeShip(r, c) : undefined}
+                  onCellClick={gameState.phase === 'PLACING' ? (r, c) => { placeShip(r, c); sound.encrypt(); } : undefined}
                 />
               </div>
             </div>
@@ -220,8 +252,8 @@ export default function App() {
                   enemyMisses={gameState.enemyMisses}
                   attackingCell={attackingCell}
                   phase={gameState.phase}
-                  onCellClick={(r, c) => doAttack(r, c)}
-                  onCellHover={(r, c) => setTargetCell(`Target: ${COLS[c]}${r + 1}`)}
+                  onCellClick={(r, c) => { doAttack(r, c); sound.attackClick(); }}
+                  onCellHover={(r, c) => { setTargetCell(`Target: ${COLS[c]}${r + 1}`); sound.hover(); }}
                   onCellLeave={() => setTargetCell(null)}
                 />
               </div>

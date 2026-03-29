@@ -8,9 +8,13 @@ interface NavbarProps {
   isMyTurn: boolean;
   phase: string;
   onLogoClick: () => void;
+  musicOn: boolean;
+  sfxOn: boolean;
+  onToggleMusic: () => void;
+  onToggleSfx: () => void;
 }
 
-export default function Navbar({ myShips, enemyShips, attackCount, hitCount, isMyTurn, phase, onLogoClick }: NavbarProps) {
+export default function Navbar({ myShips, enemyShips, attackCount, hitCount, isMyTurn, phase, onLogoClick, musicOn, sfxOn, onToggleMusic, onToggleSfx }: NavbarProps) {
   return (
     <nav className="h-16 flex items-center px-10 sticky top-0 z-50"
       style={{
@@ -68,6 +72,8 @@ export default function Navbar({ myShips, enemyShips, attackCount, hitCount, isM
             {isMyTurn ? 'Your Turn' : 'Enemy Turn'}
           </Chip>
         )}
+        <SoundToggle icon={musicOn ? 'music-on' : 'music-off'} active={musicOn} onClick={onToggleMusic} tooltip={musicOn ? 'Music On' : 'Music Off'} />
+        <SoundToggle icon={sfxOn ? 'sfx-on' : 'sfx-off'} active={sfxOn} onClick={onToggleSfx} tooltip={sfxOn ? 'SFX On' : 'SFX Off'} />
         <button className="py-[7px] px-4 text-[9px] tracking-[0.08em] border transition-all hover:border-[var(--steel-lo)] hover:text-[var(--t2)]"
           style={{ fontFamily: "'JetBrains Mono', monospace", color: 'var(--t3)', background: 'transparent', borderColor: 'var(--ghost)', cursor: 'pointer' }}
         >
@@ -92,5 +98,49 @@ function Chip({ children, className = '', style }: { children: React.ReactNode; 
     <div className={`flex items-center gap-[5px] py-[5px] px-3 text-[9px] tracking-[0.1em] uppercase border ${className}`} style={style}>
       {children}
     </div>
+  );
+}
+
+function SoundToggle({ icon, active, onClick, tooltip }: { icon: string; active: boolean; onClick: () => void; tooltip: string }) {
+  const isMusic = icon.includes('music');
+  return (
+    <button
+      onClick={onClick}
+      title={tooltip}
+      className="relative flex items-center gap-[6px] py-[5px] px-2.5 text-[9px] tracking-[0.1em] uppercase border cursor-pointer transition-all"
+      style={{
+        fontFamily: "'JetBrains Mono', monospace",
+        borderColor: active ? 'rgba(139,26,26,0.5)' : 'rgba(255,50,50,0.3)',
+        color: active ? 'var(--flame)' : 'var(--scarlet)',
+        background: active ? 'rgba(139,26,26,0.08)' : 'rgba(255,50,50,0.06)',
+      }}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {isMusic ? (
+          <>
+            <path d="M9 18V5l12-2v13" />
+            <circle cx="6" cy="18" r="3" fill={active ? 'currentColor' : 'none'} />
+            <circle cx="18" cy="16" r="3" fill={active ? 'currentColor' : 'none'} />
+          </>
+        ) : (
+          <>
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill={active ? 'currentColor' : 'none'} />
+            {active && (
+              <>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              </>
+            )}
+          </>
+        )}
+        {/* Big red diagonal slash when OFF */}
+        {!active && (
+          <line x1="2" y1="2" x2="22" y2="22" stroke="var(--scarlet)" strokeWidth="3" strokeLinecap="round" />
+        )}
+      </svg>
+      <span style={{ opacity: active ? 1 : 0.6 }}>
+        {isMusic ? (active ? 'Music' : 'Music Off') : (active ? 'SFX' : 'SFX Off')}
+      </span>
+    </button>
   );
 }
