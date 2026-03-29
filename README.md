@@ -6,7 +6,7 @@
 
 **The first on-chain game where ship positions are mathematically hidden — not just hidden by trust.**
 
-[Play Demo](https://cipherfleet.xyz) · [Watch Video](#demo) · [Smart Contract](#smart-contract) · [How It Works](#how-it-works)
+[How It Works](#how-it-works) · [Smart Contract](#smart-contract) · [Roadmap](#roadmap) · [Run It Yourself](#run-it-yourself)
 
 ---
 
@@ -27,6 +27,23 @@ CipherFleet solves this with **Fully Homomorphic Encryption (FHE)**. Your ship p
 **Think of it this way:**
 - Normal blockchain: your ships are written in plain text on a public whiteboard
 - CipherFleet: your ships are locked in a mathematical safe that can answer "is there a ship here?" without ever opening
+
+---
+
+## Screenshots
+
+> *Add screenshots of the game here before submitting*
+
+| Landing Page | Game Board | Attack Overlay |
+|:---:|:---:|:---:|
+| *Battle scene with animated fleets* | *Two 8x8 grids with live FHE feed* | *Encrypted attack sequence* |
+
+<!-- Replace with actual screenshots:
+![Landing Page](screenshots/landing.png)
+![Game Board](screenshots/game.png)
+![Attack Overlay](screenshots/attack.png)
+![Win Screen](screenshots/win.png)
+-->
 
 ---
 
@@ -196,7 +213,7 @@ A cinematic, dark-themed game UI with real-time FHE operation visualization.
 
 ```bash
 # Clone
-git clone https://github.com/yourusername/CipherFleet.git
+git clone https://github.com/martinvibes/CipherFleet.git
 cd CipherFleet
 
 # Smart contract
@@ -278,22 +295,15 @@ pnpm dev
 
 ---
 
-## Why CipherFleet Wins
+## Why Hidden-State Gaming Needs FHE
 
-We looked at all 30 projects in the buildathon:
-- **4 teams** built auction apps
-- **5 teams** built payroll apps
-- **1 team** attempted gaming — with zero FHE implementation
+Games with secrets — Poker, Battleship, Mafia — have always been broken on-chain. Every solution so far requires trusting someone: a server, an oracle, or hoping your opponent doesn't cheat the commit-reveal scheme.
 
-**CipherFleet is the only serious FHE gaming submission.** Fhenix explicitly lists gaming as a target category. Our demo is playable. No other submission lets judges interact with it like a real game.
+FHE changes this completely. For the first time, a smart contract can hold secrets it can't even read, and compute on data it can't see. Battleship is the cleanest proof of this — one encrypted check per attack, one yes/no answer back. No complex circuits, no trusted setup, no multi-party computation. Just `FHE.eq()`.
 
-Hidden-state games are the perfect use case for FHE — and we're the only ones building it.
+CipherFleet isn't just a game — it's a proof that **hidden-state gaming on-chain actually works**. And if it works for Battleship, it works for Poker, for Mafia, for any game where players need to keep secrets from each other and from the chain itself.
 
----
-
-## The Pitch
-
-> "Every on-chain game today is broken for hidden state. In Poker, Battleship, any game with secrets — you have to trust a server not to cheat. CipherFleet eliminates that trust requirement. Ships are stored as FHE ciphertext. The smart contract runs equality checks on encrypted data. No server, no oracle, no commit-reveal hack — just math."
+> *"The first on-chain game where ship positions are mathematically hidden — not just hidden by trust. No server, no oracle, no commit-reveal hack — just math."*
 
 ---
 
