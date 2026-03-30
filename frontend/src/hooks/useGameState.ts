@@ -15,8 +15,94 @@ function generateGameId(): string {
   ).join('');
 }
 
+// Generate random ship placement for enemy AI
+function generateRandomShips(): { cells: Set<string>; ships: Ship[] } {
+  const occupied = new Set<string>();
+  const ships: Ship[] = [];
+
+  for (const template of INITIAL_SHIPS) {
+    let placed = false;
+    let attempts = 0;
+    while (!placed && attempts < 200) {
+      attempts++;
+      const horizontal = Math.random() > 0.5;
+      const r = Math.floor(Math.random() * (horizontal ? 8 : 8 - template.size));
+      const c = Math.floor(Math.random() * (horizontal ? 8 - template.size : 8));
+
+      const shipCells: [number, number][] = [];
+      let valid = true;
+      for (let i = 0; i < template.size; i++) {
+        const cr = horizontal ? r : r + i;
+        const cc = horizontal ? c + i : c;
+        const key = `${cr},${cc}`;
+        if (occupied.has(key)) { valid = false; break; }
+        shipCells.push([cr, cc]);
+      }
+
+      if (valid) {
+        shipCells.forEach(([sr, sc]) => occupied.add(`${sr},${sc}`));
+        ships.push({ ...template, cells: shipCells, hits: 0, sunk: false });
+        placed = true;
+      }
+    }
+  }
+
+  return { cells: occupied, ships };
+}
+
+// Check if a ship was just sunk and return its name
+function checkShipSunk(ships: Ship[], allHits: Set<string>): { updated: Ship[]; justSunk: string | null } {
+  let justSunk: string | null = null;
+  const updated = ships.map(ship => {
+    if (ship.sunk) return ship;
+    const hits = ship.cells.filter(([r, c]) => allHits.has(`${r},${c}`)).length;
+    const nowSunk = hits >= ship.size;
+    if (nowSunk && !ship.sunk) justSunk = ship.name;
+    return { ...ship, hits, sunk: nowSunk };
+  });
+  return { updated, justSunk };
+}
+
+function countAliveShips(ships: Ship[]): number {
+  return ships.filter(s => !s.sunk).length;
+}
+
+// Simple AI: random targeting, but if it gets a hit, try adjacent cells
+function pickEnemyTarget(_myShips: Set<string>, attacked: Set<string>, myHits: Set<string>): { row: number; col: number } {
+  // If there's an unresolved hit (hit but ship not fully sunk), try adjacent cells
+  const unresolvedHits = Array.from(myHits).filter(key => {
+    const [r, c] = key.split(',').map(Number);
+    // Check if any adjacent cell is unattacked
+    return [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].some(([ar, ac]) =>
+      ar >= 0 && ar < 8 && ac >= 0 && ac < 8 && !attacked.has(`${ar},${ac}`)
+    );
+  });
+
+  if (unresolvedHits.length > 0) {
+    const target = unresolvedHits[Math.floor(Math.random() * unresolvedHits.length)];
+    const [r, c] = target.split(',').map(Number);
+    const adjacent = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+      .filter(([ar, ac]) => ar >= 0 && ar < 8 && ac >= 0 && ac < 8 && !attacked.has(`${ar},${ac}`));
+    if (adjacent.length > 0) {
+      const [ar, ac] = adjacent[Math.floor(Math.random() * adjacent.length)];
+      return { row: ar, col: ac };
+    }
+  }
+
+  // Random targeting
+  let row: number, col: number;
+  do {
+    row = Math.floor(Math.random() * 8);
+    col = Math.floor(Math.random() * 8);
+  } while (attacked.has(`${row},${col}`));
+  return { row, col };
+}
+
 export function useGameState() {
   const startTime = useRef(Date.now());
+
+  const initEnemy = generateRandomShips();
+
   const [gameState, setGameState] = useState<GameState>({
     gameId: generateGameId(),
     phase: 'PLACING',
@@ -30,6 +116,9 @@ export function useGameState() {
     hitCount: 0,
     isMyTurn: true,
     ships: INITIAL_SHIPS.map(s => ({ ...s, cells: [] })),
+    enemyShipCells: initEnemy.cells,
+    enemyShipList: initEnemy.ships,
+    enemyAttackedCells: new Set<string>(),
   });
 
   const [logs, setLogs] = useState<FHELogEntry[]>([]);
@@ -38,6 +127,8 @@ export function useGameState() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayResult, setOverlayResult] = useState<{ coord: string; row: number; col: number; hit: boolean } | null>(null);
   const [showWin, setShowWin] = useState(false);
+  const [showLoss, setShowLoss] = useState(false);
+  const [sunkMessage, setSunkMessage] = useState<string | null>(null);
   const [placingShipIndex, setPlacingShipIndex] = useState(0);
   const [placingOrientation, setPlacingOrientation] = useState<'H' | 'V'>('H');
 
@@ -93,17 +184,76 @@ export function useGameState() {
       };
     });
 
-    addLog('enc', 'ENC', `FHE.asEuint8(1) × ${INITIAL_SHIPS[placingShipIndex]?.size || 0} cells`);
-    addLog('enc', 'ENC', 'FHE.allowThis() × handles');
-    addLog('sys', 'SYS', `${INITIAL_SHIPS[placingShipIndex]?.name} encrypted on-chain`);
+    addLog('enc', 'ENC', `${INITIAL_SHIPS[placingShipIndex]?.name} encrypted (${INITIAL_SHIPS[placingShipIndex]?.size} cells)`);
 
     if (placingShipIndex < INITIAL_SHIPS.length - 1) {
       setPlacingShipIndex(i => i + 1);
     } else {
-      addLog('sys', 'SYS', 'Fleet committed on-chain');
+      addLog('sys', 'SYS', 'All ships encrypted \u2014 fleet deployed');
     }
   }, [placingShipIndex, placingOrientation, addLog]);
 
+  // ── Enemy AI turn ──
+  const doEnemyAttack = useCallback(() => {
+    setGameState(prev => {
+      if (prev.phase !== 'BATTLE') return prev;
+
+      const target = pickEnemyTarget(prev.myShips, prev.enemyAttackedCells, prev.myHits);
+      const key = `${target.row},${target.col}`;
+      const coord = `${COLS[target.col]}${target.row + 1}`;
+      const isHit = prev.myShips.has(key);
+
+      const newAttacked = new Set(prev.enemyAttackedCells);
+      newAttacked.add(key);
+
+      const newMyHits = new Set(prev.myHits);
+      if (isHit) newMyHits.add(key);
+
+      // Check ship sinking on my fleet
+      const { updated: updatedMyShips, justSunk } = checkShipSunk(prev.ships, newMyHits);
+      const myAlive = countAliveShips(updatedMyShips);
+      const totalMyHits = updatedMyShips.reduce((sum, s) => sum + s.hits, 0);
+      const allMySunk = totalMyHits >= 11;
+
+      // Log the enemy attack
+      setTimeout(() => {
+        if (isHit) {
+          addLog('hit', 'HIT', `Enemy hit [${coord}] on your board!`);
+          if (justSunk) {
+            addLog('hit', 'SUNK', `Your ${justSunk} destroyed!`);
+            setSunkMessage(`Your ${justSunk} has been sunk!`);
+            setTimeout(() => setSunkMessage(null), 3000);
+          }
+        } else {
+          addLog('miss', 'MISS', `Enemy missed [${coord}]`);
+        }
+      }, 0);
+
+      if (allMySunk) {
+        setTimeout(() => setShowLoss(true), 500);
+        return {
+          ...prev,
+          myHits: newMyHits,
+          enemyAttackedCells: newAttacked,
+          ships: updatedMyShips,
+          myShipsRemaining: 0,
+          isMyTurn: true,
+          phase: 'FINISHED' as Phase,
+        };
+      }
+
+      return {
+        ...prev,
+        myHits: newMyHits,
+        enemyAttackedCells: newAttacked,
+        ships: updatedMyShips,
+        myShipsRemaining: myAlive,
+        isMyTurn: true,
+      };
+    });
+  }, [addLog]);
+
+  // ── Player attack ──
   const doAttack = useCallback((row: number, col: number) => {
     const key = `${row},${col}`;
     if (gameState.enemyHits.has(key) || gameState.enemyMisses.has(key)) return;
@@ -113,22 +263,24 @@ export function useGameState() {
     setAttackingCell(key);
     setShowOverlay(true);
 
-    addLog('fhe', 'FHE', `FHE.eq(grid[${row}][${col}], euint8(1))`);
-    addLog('sys', 'NET', `Threshold ${3 + Math.floor(Math.random() * 2)}/5 nodes`);
+    // Disable further attacks
+    setGameState(prev => ({ ...prev, isMyTurn: false }));
 
-    const isHit = Math.random() > 0.58;
+    addLog('fhe', 'FHE', `FHE.eq(grid[${row}][${col}], euint8(1)) \u2192 computing...`);
 
-    // Phase 1: show overlay with computing state (no result yet)
-    // Phase 2: after delay, reveal result
+    // Check against actual enemy ship positions
+    const isHit = gameState.enemyShipCells.has(key);
+
+    // Phase 1: computing animation
     setTimeout(() => {
       setOverlayResult({ coord, row, col, hit: isHit });
     }, 1900);
 
+    // Phase 2: resolve
     setTimeout(() => {
       setGameState(prev => {
         const newEnemyHits = new Set(prev.enemyHits);
         const newEnemyMisses = new Set(prev.enemyMisses);
-        let newEnemyShips = prev.enemyShipsRemaining;
 
         if (isHit) {
           newEnemyHits.add(key);
@@ -136,15 +288,34 @@ export function useGameState() {
           newEnemyMisses.add(key);
         }
 
-        if (isHit && newEnemyHits.size >= 11) {
+        // Check enemy ship sinking
+        const { updated: updatedEnemyShips, justSunk } = checkShipSunk(prev.enemyShipList, newEnemyHits);
+        const enemyAlive = countAliveShips(updatedEnemyShips);
+        const totalEnemyHits = updatedEnemyShips.reduce((sum, s) => sum + s.hits, 0);
+        const allEnemySunk = totalEnemyHits >= 11;
+
+        if (isHit) {
+          addLog('hit', 'HIT', `You hit [${coord}]!`);
+          if (justSunk) {
+            addLog('hit', 'SUNK', `Enemy ${justSunk} destroyed!`);
+            setSunkMessage(`Enemy ${justSunk} sunk!`);
+            setTimeout(() => setSunkMessage(null), 3000);
+          }
+        } else {
+          addLog('miss', 'MISS', `You missed [${coord}]`);
+        }
+
+        if (allEnemySunk) {
           return {
             ...prev,
             enemyHits: newEnemyHits,
             enemyMisses: newEnemyMisses,
+            enemyShipList: updatedEnemyShips,
             attackCount: prev.attackCount + 1,
             hitCount: prev.hitCount + (isHit ? 1 : 0),
             enemyShipsRemaining: 0,
             phase: 'FINISHED' as Phase,
+            isMyTurn: false,
           };
         }
 
@@ -152,30 +323,40 @@ export function useGameState() {
           ...prev,
           enemyHits: newEnemyHits,
           enemyMisses: newEnemyMisses,
+          enemyShipList: updatedEnemyShips,
           attackCount: prev.attackCount + 1,
           hitCount: prev.hitCount + (isHit ? 1 : 0),
-          enemyShipsRemaining: newEnemyShips,
+          enemyShipsRemaining: enemyAlive,
+          isMyTurn: false,
         };
       });
 
-      if (isHit) {
-        addLog('hit', 'HIT', `ebool \u2192 true \u00B7 Hit [${coord}]`);
-        addLog('sys', 'SYS', 'Coordinates still encrypted \u2713');
-      } else {
-        addLog('miss', 'DEC', `ebool \u2192 false \u00B7 Miss [${coord}]`);
-      }
-
       setAttackingCell(null);
+
+      // Close overlay, then check win or do enemy turn
+      const allSunk = isHit && gameState.enemyShipCells.size > 0 &&
+        (() => {
+          const testHits = new Set(gameState.enemyHits);
+          testHits.add(key);
+          return checkShipSunk(gameState.enemyShipList, testHits).updated.reduce((sum, s) => sum + s.hits, 0) >= 11;
+        })();
 
       setTimeout(() => {
         setShowOverlay(false);
         setOverlayResult(null);
-        if (isHit && gameState.enemyHits.size + 1 >= 11) {
-          setShowWin(true);
+
+        if (allSunk) {
+          setTimeout(() => setShowWin(true), 300);
+        } else {
+          // Enemy turn — wait for turn banner to show and breathe
+          setTimeout(() => {
+            addLog('sys', 'SYS', 'Enemy turn...');
+            setTimeout(() => doEnemyAttack(), 2200);
+          }, 400);
         }
       }, 1700);
     }, 2500);
-  }, [gameState, addLog]);
+  }, [gameState, addLog, doEnemyAttack]);
 
   // Auto-place ships and jump to battle (for demo)
   const quickDeploy = useCallback(() => {
@@ -188,22 +369,26 @@ export function useGameState() {
     const shipCells = new Set<string>();
     presetShips.forEach(s => s.cells.forEach(([r, c]) => shipCells.add(`${r},${c}`)));
 
+    const enemy = generateRandomShips();
+
     setGameState(prev => ({
       ...prev,
       phase: 'BATTLE' as Phase,
       myShips: shipCells,
       ships: presetShips,
+      enemyShipCells: enemy.cells,
+      enemyShipList: enemy.ships,
+      isMyTurn: true,
     }));
     setPlacingShipIndex(INITIAL_SHIPS.length);
 
-    addLog('enc', 'ENC', 'FHE.asEuint8(1) \u00D7 11 cells');
-    addLog('enc', 'ENC', 'FHE.allowThis() \u00D7 11 handles');
-    addLog('sys', 'SYS', 'Fleet committed on-chain');
-    addLog('sys', 'SYS', 'Quick deploy \u2014 all ships encrypted');
+    addLog('enc', 'ENC', 'All ships encrypted (11 cells)');
+    addLog('sys', 'SYS', 'Your fleet deployed \u2014 ready for battle');
   }, [addLog]);
 
   const resetGame = useCallback(() => {
     startTime.current = Date.now();
+    const enemy = generateRandomShips();
     setGameState({
       gameId: generateGameId(),
       phase: 'PLACING',
@@ -217,10 +402,15 @@ export function useGameState() {
       hitCount: 0,
       isMyTurn: true,
       ships: INITIAL_SHIPS.map(s => ({ ...s, cells: [] })),
+      enemyShipCells: enemy.cells,
+      enemyShipList: enemy.ships,
+      enemyAttackedCells: new Set<string>(),
     });
     setPlacingShipIndex(0);
     setLogs([]);
     setShowWin(false);
+    setShowLoss(false);
+    setSunkMessage(null);
     addLog('sys', 'SYS', 'Game reset \u2014 new encrypted grid');
   }, [addLog]);
 
@@ -234,6 +424,9 @@ export function useGameState() {
     overlayResult,
     showWin,
     setShowWin,
+    showLoss,
+    setShowLoss,
+    sunkMessage,
     placingShipIndex,
     placingOrientation,
     setPlacingOrientation,

@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="frontend/public/favicon.svg" width="80" alt="CipherFleet Logo" />
+
 # CipherFleet
 
 ### The ocean is encrypted.

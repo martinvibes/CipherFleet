@@ -74,53 +74,56 @@ export default function FHEFeed({ logs, onClear, lastAttack }: FHEFeedProps) {
         })}
       </div>
 
-      {/* FHE Operation Display */}
+      {/* Last attack result */}
       <div className="shrink-0 p-3.5 px-4" style={{ borderTop: '1px solid var(--ghost)' }}>
-        <div className="text-[7px] tracking-[0.2em] uppercase mb-2.5" style={{ color: 'var(--t3)' }}>
-          Last Operation {'\u2014'} FHE.eq()
-        </div>
-        <div className="p-2.5 px-3 mb-3" style={{ background: 'var(--abyss)', border: '1px solid var(--ghost)', borderLeft: '2px solid var(--crimson)' }}>
-          {lastAttack ? (
-            <>
-              <CodeLine><span className="font-medium" style={{ color: 'var(--flame)' }}>FHE</span>.eq(</CodeLine>
-              <CodeLine>&nbsp;&nbsp;grid[<span style={{ color: '#a8c8e8' }}>{lastAttack.row}</span>][<span style={{ color: '#a8c8e8' }}>{lastAttack.col}</span>], <span className="text-[8.5px]" style={{ color: 'var(--t4)' }}>// euint8</span></CodeLine>
-              <CodeLine>&nbsp;&nbsp;<span className="font-medium" style={{ color: 'var(--flame)' }}>euint8</span>(<span style={{ color: '#a8c8e8' }}>1</span>)</CodeLine>
-              <CodeLine>) {'\u2192'} <span className="font-semibold" style={{ color: lastAttack.hit ? 'var(--scarlet)' : 'var(--steel-lo)' }}>ebool({lastAttack.hit ? 'true' : 'false'})</span></CodeLine>
-            </>
-          ) : (
-            <CodeLine style={{ color: 'var(--t4)' }}>Awaiting operation...</CodeLine>
-          )}
-        </div>
-
-        {/* Pipeline */}
-        <div className="flex flex-col gap-[3px]">
-          {['Client encrypt', 'Tx on Arbitrum', 'CoFHE FHE.eq()', 'Threshold 5/5', lastAttack ? `Result: ${lastAttack.hit ? 'true' : 'false'}` : 'Awaiting...'].map((step, i) => {
-            const done = lastAttack != null;
-            return (
-              <div key={i}>
-                <div className="flex items-center gap-[7px] text-[9px] tracking-[0.03em] transition-colors" style={{ color: done ? 'var(--safe-hi)' : 'var(--t4)' }}>
-                  <div
-                    className="w-[13px] h-[13px] rounded-full border flex items-center justify-center text-[7px] shrink-0"
-                    style={done ? { background: 'var(--safe-hi)', color: 'var(--abyss)', borderColor: 'var(--safe-hi)' } : { borderColor: 'currentColor' }}
-                  >
-                    {done ? '\u2713' : ''}
-                  </div>
-                  {step}
-                </div>
-                {i < 4 && <div className="w-px h-1 ml-[5px]" style={{ background: 'var(--ghost)' }} />}
+        {lastAttack ? (
+          <>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[7px] tracking-[0.2em] uppercase" style={{ color: 'var(--t3)' }}>
+                Last Strike
               </div>
-            );
-          })}
-        </div>
+              <div className="py-[2px] px-[6px]" style={{
+                background: lastAttack.hit ? 'rgba(212,40,40,0.1)' : 'rgba(60,120,180,0.08)',
+                border: lastAttack.hit ? '1px solid rgba(212,40,40,0.3)' : '1px solid rgba(60,120,180,0.2)',
+              }}>
+                <span className="text-[7px] tracking-[0.15em] uppercase font-medium" style={{
+                  color: lastAttack.hit ? 'var(--flame)' : 'rgba(100,160,220,0.7)',
+                }}>
+                  {lastAttack.hit ? 'Direct Hit' : 'Missed'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 mb-3">
+              <div className="text-[28px] font-bold" style={{
+                fontFamily: "'Cinzel', serif",
+                color: lastAttack.hit ? 'var(--flame)' : 'var(--t3)',
+                textShadow: lastAttack.hit ? '0 0 12px rgba(212,40,40,0.3)' : 'none',
+                lineHeight: 1,
+              }}>
+                {String.fromCharCode(65 + lastAttack.col)}{lastAttack.row + 1}
+              </div>
+              <div className="flex-1">
+                <div className="text-[8px] tracking-[0.05em] mb-1" style={{ color: 'var(--t4)', fontFamily: "'JetBrains Mono', monospace" }}>
+                  grid[{lastAttack.row}][{lastAttack.col}]
+                </div>
+                <div className="text-[8px] tracking-[0.05em]" style={{ color: lastAttack.hit ? 'var(--crimson)' : 'var(--t4)', fontFamily: "'JetBrains Mono', monospace" }}>
+                  ebool {'\u2192'} {lastAttack.hit ? 'true' : 'false'}
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center py-3">
+            <div className="text-[7px] tracking-[0.2em] uppercase mb-2" style={{ color: 'var(--t4)' }}>
+              No attacks yet
+            </div>
+            <div className="text-[9px]" style={{ color: 'var(--t4)' }}>
+              Select a target to begin
+            </div>
+          </div>
+        )}
       </div>
     </aside>
-  );
-}
-
-function CodeLine({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
-  return (
-    <div className="text-[9.5px] leading-[2] font-light" style={{ color: 'var(--t2)', ...style }}>
-      {children}
-    </div>
   );
 }

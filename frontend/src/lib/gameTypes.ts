@@ -38,6 +38,10 @@ export interface GameState {
   hitCount: number;
   isMyTurn: boolean;
   ships: Ship[];
+  // Enemy AI state
+  enemyShipCells: Set<string>;       // hidden enemy ship positions
+  enemyShipList: Ship[];             // enemy fleet for sink tracking
+  enemyAttackedCells: Set<string>;   // cells enemy has attacked on your board
 }
 
 export const COLS = 'ABCDEFGH';

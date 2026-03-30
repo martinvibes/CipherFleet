@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 
 // Preload an audio file and return a play function
-function createSound(src: string, volume = 1, loop = false): { play: () => void; stop: () => void; setVolume: (v: number) => void; audio: HTMLAudioElement } {
+function createSound(src: string, volume = 1, loop = false): { play: () => void; stop: () => void; setVolume: (v: number) => void; audio: HTMLAudioElement; isPlaying: () => boolean } {
   const audio = new Audio(src);
   audio.volume = volume;
   audio.loop = loop;
@@ -9,15 +9,16 @@ function createSound(src: string, volume = 1, loop = false): { play: () => void;
 
   return {
     audio,
+    isPlaying: () => !audio.paused && !audio.ended,
     play: () => {
       if (!loop) {
         const clone = audio.cloneNode(true) as HTMLAudioElement;
         clone.volume = audio.volume;
         clone.play().catch(() => {});
       } else {
-        if (audio.paused) {
-          audio.play().catch(() => {});
-        }
+        // For loops: never start if already playing
+        if (!audio.paused) return;
+        audio.play().catch(() => {});
       }
     },
     stop: () => {
@@ -152,6 +153,11 @@ export function useSound() {
 
   const startDrone = useCallback((volume = 0.3) => {
     init();
+    if (bgMusic.current?.isPlaying()) {
+      // Already playing — just adjust volume
+      bgMusic.current.setVolume(volume);
+      return;
+    }
     bgMusic.current?.setVolume(volume);
     bgMusic.current?.play();
   }, [init]);

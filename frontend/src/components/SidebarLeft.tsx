@@ -111,17 +111,23 @@ export default function SidebarLeft({ phase, ships, placingShipIndex, placingOri
         </div>
       </div>
 
-      {/* FHE info box */}
+      {/* FHE Encryption Status */}
       <div className="mx-3.5 mb-3.5 p-3.5" style={{ background: 'rgba(139,26,26,0.06)', border: '1px solid rgba(139,26,26,0.2)' }}>
-        <div className="flex items-center gap-1.5 mb-2 text-[7px] tracking-[0.2em] uppercase" style={{ color: 'var(--crimson)' }}>
-          <span style={{ color: 'var(--crimson)', fontSize: '10px' }}>{'\u2B21'}</span>
-          FHE Active
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1.5 text-[7px] tracking-[0.2em] uppercase" style={{ color: 'var(--crimson)' }}>
+            <span style={{ fontSize: '10px' }}>{'\u2B21'}</span>
+            FHE Engine
+          </div>
+          <div className="flex items-center gap-1 py-[2px] px-[6px]" style={{ background: 'rgba(32,160,96,0.08)', border: '1px solid rgba(32,160,96,0.2)' }}>
+            <div className="w-[4px] h-[4px] rounded-full" style={{ background: 'var(--safe-hi)', animation: 'dot-blink 2s ease-in-out infinite' }} />
+            <span className="text-[6px] tracking-[0.15em] uppercase" style={{ color: 'var(--safe-hi)' }}>Active</span>
+          </div>
         </div>
-        <div className="text-[9.5px] leading-[1.75] font-light" style={{ color: 'var(--t3)' }}>
-          Ships stored as <code className="text-[9px] py-px px-[5px]" style={{ color: 'var(--flame)', background: 'rgba(139,26,26,0.15)' }}>euint8</code> on-chain.
-          Attacks call <code className="text-[9px] py-px px-[5px]" style={{ color: 'var(--flame)', background: 'rgba(139,26,26,0.15)' }}>FHE.eq()</code> on ciphertext.
-          Coordinates never decrypted.
-          Result: <code className="text-[9px] py-px px-[5px]" style={{ color: 'var(--flame)', background: 'rgba(139,26,26,0.15)' }}>ebool</code> only.
+        <div className="flex flex-col gap-[6px]">
+          <StatusRow label="Encryption" value="euint8" />
+          <StatusRow label="Operation" value="FHE.eq()" />
+          <StatusRow label="Network" value="CoFHE 5/5" />
+          <StatusRow label="Chain" value="Arbitrum" />
         </div>
       </div>
 
@@ -145,6 +151,15 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     <div className="flex items-center gap-2 mb-3 text-[7px] tracking-[0.22em] uppercase" style={{ color: 'var(--t3)' }}>
       {children}
       <div className="flex-1 h-px" style={{ background: 'var(--ghost)' }} />
+    </div>
+  );
+}
+
+function StatusRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-[8px] tracking-[0.08em] uppercase" style={{ color: 'var(--t4)' }}>{label}</span>
+      <code className="text-[8px] py-px px-[5px]" style={{ color: 'var(--flame)', background: 'rgba(139,26,26,0.12)', fontFamily: "'JetBrains Mono', monospace" }}>{value}</code>
     </div>
   );
 }
