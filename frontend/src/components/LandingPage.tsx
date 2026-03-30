@@ -478,17 +478,17 @@ export default function LandingPage({ onStartGame, onFirstInteraction }: Landing
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6">
 
         {/* Classified header */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between py-4 px-8 z-20" style={{
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between py-3 sm:py-4 px-4 sm:px-8 z-20" style={{
           borderBottom: '1px solid rgba(139,26,26,0.15)',
           background: 'linear-gradient(180deg, rgba(6,5,10,0.9) 0%, transparent 100%)',
         }}>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-2 h-2 rounded-full" style={{ background: 'var(--crimson)', animation: 'dot-blink 1.6s ease-in-out infinite' }} />
-            <span className="text-[8px] tracking-[0.25em] uppercase" style={{ color: 'var(--t4)' }}>
-              Classified &middot; FHE Encrypted Channel
+            <span className="text-[7px] sm:text-[8px] tracking-[0.2em] sm:tracking-[0.25em] uppercase" style={{ color: 'var(--t4)' }}>
+              Classified &middot; FHE Encrypted
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-4">
             <span className="text-[8px] tracking-[0.15em] uppercase" style={{ color: 'var(--t4)' }}>
               CoFHE: <span style={{ color: 'var(--safe-hi)' }}>Online</span>
             </span>
@@ -527,7 +527,7 @@ export default function LandingPage({ onStartGame, onFirstInteraction }: Landing
           {/* Title with glitch */}
           <div className="relative mb-3">
             <h1 className="text-center uppercase tracking-[0.2em]" style={{
-              fontFamily: "'Cinzel', serif", fontSize: 'clamp(52px, 9vw, 88px)', fontWeight: 900,
+              fontFamily: "'Cinzel', serif", fontSize: 'clamp(32px, 9vw, 88px)', fontWeight: 900,
               color: 'var(--t1)', lineHeight: 1,
               textShadow: glitch ? '3px 0 var(--crimson), -3px 0 rgba(0,200,255,0.3)' : '0 0 60px rgba(139,26,26,0.3), 0 0 120px rgba(139,26,26,0.15)',
               transition: glitch ? 'none' : 'text-shadow 0.3s',
@@ -538,12 +538,12 @@ export default function LandingPage({ onStartGame, onFirstInteraction }: Landing
             {glitch && (
               <>
                 <h1 className="absolute top-0 left-0 text-center uppercase tracking-[0.2em] w-full" style={{
-                  fontFamily: "'Cinzel', serif", fontSize: 'clamp(52px, 9vw, 88px)', fontWeight: 900,
+                  fontFamily: "'Cinzel', serif", fontSize: 'clamp(32px, 9vw, 88px)', fontWeight: 900,
                   color: 'transparent', lineHeight: 1, WebkitTextStroke: '1px rgba(184,32,32,0.4)',
                   transform: 'translate(3px, -2px)', clipPath: 'inset(20% 0 40% 0)',
                 }}>{typedTitle}</h1>
                 <h1 className="absolute top-0 left-0 text-center uppercase tracking-[0.2em] w-full" style={{
-                  fontFamily: "'Cinzel', serif", fontSize: 'clamp(52px, 9vw, 88px)', fontWeight: 900,
+                  fontFamily: "'Cinzel', serif", fontSize: 'clamp(32px, 9vw, 88px)', fontWeight: 900,
                   color: 'transparent', lineHeight: 1, WebkitTextStroke: '1px rgba(0,150,255,0.2)',
                   transform: 'translate(-2px, 2px)', clipPath: 'inset(50% 0 10% 0)',
                 }}>{typedTitle}</h1>
@@ -574,7 +574,7 @@ export default function LandingPage({ onStartGame, onFirstInteraction }: Landing
           </div>
 
           {/* Feature cards */}
-          <div className="grid grid-cols-3 gap-5 mb-10 w-full max-w-[660px]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-10 w-full max-w-[660px] px-4 sm:px-0">
             {[
               { step: 'I', icon: '\u2693', title: 'Deploy Fleet', desc: 'Ship coordinates encrypted as euint8 ciphertext. Stored on-chain, unreadable by anyone.', accent: 'var(--crimson)' },
               { step: 'II', icon: '\u2316', title: 'Encrypted Strike', desc: 'FHE.eq() runs on ciphertext in the CoFHE coprocessor. Positions never decrypted.', accent: 'var(--gold)' },
@@ -619,7 +619,7 @@ export default function LandingPage({ onStartGame, onFirstInteraction }: Landing
           </p>
 
           {/* Footer */}
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-3 px-4">
             {['Fhenix CoFHE', 'Arbitrum Sepolia', 'AKINDO WaveHack', 'FHE.eq()'].map(l => (
               <span key={l} className="text-[7px] tracking-[0.14em] uppercase py-[4px] px-[10px] border transition-colors hover:border-[rgba(139,26,26,0.3)] hover:text-[var(--t3)]"
                 style={{ borderColor: 'var(--ghost)', color: 'var(--t4)' }}>{l}</span>

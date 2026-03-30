@@ -146,7 +146,7 @@ export default function App() {
         {/* Arena center */}
         <main className="flex flex-col overflow-hidden">
           {/* Arena header */}
-          <div className="flex items-center justify-between py-3.5 px-8" style={{ borderBottom: '1px solid var(--ghost)', background: 'rgba(12,10,18,0.6)' }}>
+          <div className="arena-header-wrap flex items-center justify-between py-3.5 px-8" style={{ borderBottom: '1px solid var(--ghost)', background: 'rgba(12,10,18,0.6)' }}>
             <div className="text-[9px] tracking-[0.1em]" style={{ color: 'var(--t3)' }}>
               Game <strong style={{ color: 'var(--t2)' }}>#{gameState.gameId}</strong> &middot; vs <strong style={{ color: 'var(--t2)' }}>0x9e1d...a4f2</strong>
             </div>
@@ -165,7 +165,7 @@ export default function App() {
             {/* Placing phase overlay prompt */}
             {gameState.phase === 'PLACING' && showPlacingPrompt && (
               <div className="absolute inset-0 z-10 flex items-center justify-center" style={{ background: 'rgba(6,5,10,0.85)', backdropFilter: 'blur(4px)' }}>
-                <div className="flex flex-col items-center text-center px-8 max-w-[460px]">
+                <div className="placing-overlay-inner flex flex-col items-center text-center px-8 max-w-[460px]">
                   <div className="text-[8px] tracking-[0.3em] uppercase mb-4" style={{ color: 'var(--crimson)' }}>
                     Deploy Your Fleet
                   </div>
@@ -207,7 +207,7 @@ export default function App() {
 
             {/* My board */}
             <div className="flex flex-col overflow-hidden" style={{ borderRight: '1px solid var(--ghost)' }}>
-              <div className="py-3 px-[18px] flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid var(--ghost)', background: 'rgba(12,10,18,0.4)' }}>
+              <div className="board-header-wrap py-3 px-[18px] flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid var(--ghost)', background: 'rgba(12,10,18,0.4)' }}>
                 <div className="flex items-center gap-2 text-[8px] tracking-[0.2em] uppercase" style={{ color: 'var(--t3)' }}>
                   <div className="w-5 h-5 border flex items-center justify-center text-[9px]" style={{ borderColor: 'var(--ghost)' }}>{'\u25C8'}</div>
                   My Fleet
@@ -233,7 +233,7 @@ export default function App() {
 
             {/* Enemy board */}
             <div className="flex flex-col overflow-hidden">
-              <div className="py-3 px-[18px] flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid var(--ghost)', background: 'rgba(12,10,18,0.4)' }}>
+              <div className="board-header-wrap py-3 px-[18px] flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid var(--ghost)', background: 'rgba(12,10,18,0.4)' }}>
                 <div className="flex items-center gap-2 text-[8px] tracking-[0.2em] uppercase" style={{ color: 'var(--t3)' }}>
                   <div className="w-5 h-5 border flex items-center justify-center text-[9px]" style={{ borderColor: 'var(--ghost)' }}>{'\u25CE'}</div>
                   Enemy Waters

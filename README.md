@@ -30,20 +30,15 @@ CipherFleet solves this with **Fully Homomorphic Encryption (FHE)**. Your ship p
 
 ---
 
-## Screenshots
+## Preview
 
-> *Add screenshots of the game here before submitting*
+<div align="center">
 
-| Landing Page | Game Board | Attack Overlay |
-|:---:|:---:|:---:|
-| *Battle scene with animated fleets* | *Two 8x8 grids with live FHE feed* | *Encrypted attack sequence* |
+![CipherFleet Landing Page](frontend/public/cipher_img_doc.png)
 
-<!-- Replace with actual screenshots:
-![Landing Page](screenshots/landing.png)
-![Game Board](screenshots/game.png)
-![Attack Overlay](screenshots/attack.png)
-![Win Screen](screenshots/win.png)
--->
+*Landing page with live naval battle scene — ships exchange fire while hex rain falls and radar sweeps the encrypted ocean.*
+
+</div>
 
 ---
 

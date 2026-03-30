@@ -16,7 +16,7 @@ interface NavbarProps {
 
 export default function Navbar({ myShips, enemyShips, attackCount, hitCount, isMyTurn, phase, onLogoClick, musicOn, sfxOn, onToggleMusic, onToggleSfx }: NavbarProps) {
   return (
-    <nav className="h-16 flex items-center px-10 sticky top-0 z-50"
+    <nav className="nav-wrap h-16 flex items-center px-10 sticky top-0 z-50"
       style={{
         borderBottom: '1px solid rgba(139,26,26,0.3)',
         background: 'linear-gradient(180deg, rgba(12,10,18,0.98) 0%, rgba(12,10,18,0.85) 100%)',
@@ -42,7 +42,7 @@ export default function Navbar({ myShips, enemyShips, attackCount, hitCount, isM
       </div>
 
       {/* Center stats */}
-      <div className="hidden md:flex items-center gap-5 absolute left-1/2 -translate-x-1/2">
+      <div className="nav-center-stats hidden md:flex items-center gap-5 absolute left-1/2 -translate-x-1/2">
         <StatBlock value={myShips} label="My Ships" color="var(--safe-hi)" />
         <StatBlock value={enemyShips} label="Enemy" color="var(--scarlet)" />
         <StatBlock value={attackCount} label="Attacks" color="var(--gold-hi)" />
@@ -50,12 +50,12 @@ export default function Navbar({ myShips, enemyShips, attackCount, hitCount, isM
       </div>
 
       {/* Right chips */}
-      <div className="flex items-center gap-2.5 ml-auto">
-        <Chip className="border-[rgba(139,26,26,0.6)]" style={{ color: 'var(--flame)', background: 'rgba(139,26,26,0.1)' }}>
+      <div className="nav-chips-wrap flex items-center gap-2.5 ml-auto">
+        <Chip className="chip-hide-mobile border-[rgba(139,26,26,0.6)]" style={{ color: 'var(--flame)', background: 'rgba(139,26,26,0.1)' }}>
           <span className="w-[5px] h-[5px] rounded-full bg-current" style={{ animation: 'dot-blink 1.6s ease-in-out infinite' }} />
           FHE Active
         </Chip>
-        <Chip style={{ borderColor: 'var(--ghost)', color: 'var(--t3)' }}>
+        <Chip className="chip-hide-mobile" style={{ borderColor: 'var(--ghost)', color: 'var(--t3)' }}>
           Arbitrum Sepolia
         </Chip>
         {phase === 'BATTLE' && (

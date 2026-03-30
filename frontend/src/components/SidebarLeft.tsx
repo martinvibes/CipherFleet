@@ -19,7 +19,7 @@ export default function SidebarLeft({ phase, ships, placingShipIndex, placingOri
   ];
 
   return (
-    <aside className="flex flex-col overflow-hidden" style={{ borderRight: '1px solid var(--ghost)', background: 'linear-gradient(180deg, var(--deep) 0%, var(--abyss) 100%)' }}>
+    <aside className="sidebar-left-wrap flex flex-col overflow-hidden" style={{ borderRight: '1px solid var(--ghost)', background: 'linear-gradient(180deg, var(--deep) 0%, var(--abyss) 100%)' }}>
       {/* Phase indicator */}
       <div className="p-4" style={{ borderBottom: '1px solid var(--ghost)' }}>
         <SectionTitle>Mission Phase</SectionTitle>

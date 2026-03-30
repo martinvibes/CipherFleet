@@ -253,15 +253,56 @@ body::after {
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
+
+/* Tablet */
 @media(max-width: 1200px) {
-  .layout-grid { grid-template-columns: 190px 1fr 240px !important; }
+  .layout-grid { grid-template-columns: 180px 1fr 220px !important; }
 }
+
+/* Small tablet — stack sidebars */
 @media(max-width: 960px) {
   .layout-grid {
     grid-template-columns: 1fr !important;
     grid-template-rows: auto 1fr auto !important;
+    min-height: auto !important;
+  }
+  .sidebar-left-wrap {
+    border-right: none !important;
+    border-bottom: 1px solid var(--ghost);
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .sidebar-right-wrap {
+    border-left: none !important;
+    border-top: 1px solid var(--ghost);
+    max-height: 250px;
   }
 }
+
+/* Mobile — stack boards, simplify nav */
 @media(max-width: 640px) {
   .battle-zone { grid-template-columns: 1fr !important; }
+
+  .nav-center-stats { display: none !important; }
+  .nav-chips-wrap { gap: 4px !important; }
+  .nav-chips-wrap .chip-hide-mobile { display: none !important; }
+  .nav-wrap { padding: 0 1rem !important; }
+
+  .arena-header-wrap { flex-direction: column; gap: 6px; padding: 10px 16px !important; }
+  .arena-header-wrap > * { text-align: center; }
+
+  .board-header-wrap { flex-direction: column; gap: 4px; padding: 8px 12px !important; }
+
+  .placing-overlay-inner { padding: 0 1.5rem !important; max-width: 100% !important; }
+  .placing-overlay-inner .text-\[28px\] { font-size: 22px !important; }
+
+  .grid { max-width: 280px !important; }
+
+  .cell { font-size: 8px; }
+}
+
+/* Very small screens */
+@media(max-width: 400px) {
+  .grid { max-width: 240px !important; }
+  .nav-wrap { padding: 0 0.5rem !important; }
 }

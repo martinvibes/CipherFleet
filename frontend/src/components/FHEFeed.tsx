@@ -33,7 +33,7 @@ export default function FHEFeed({ logs, onClear, lastAttack }: FHEFeedProps) {
   }, [logs]);
 
   return (
-    <aside className="flex flex-col overflow-hidden" style={{ borderLeft: '1px solid var(--ghost)', background: 'linear-gradient(180deg, var(--deep) 0%, var(--abyss) 100%)' }}>
+    <aside className="sidebar-right-wrap flex flex-col overflow-hidden" style={{ borderLeft: '1px solid var(--ghost)', background: 'linear-gradient(180deg, var(--deep) 0%, var(--abyss) 100%)' }}>
       {/* Header */}
       <div className="p-3.5 px-4 flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid var(--ghost)' }}>
         <div className="flex items-center gap-[7px] text-[8px] tracking-[0.18em] uppercase" style={{ color: 'var(--t3)' }}>
